@@ -274,6 +274,25 @@ class SkulerDrawing
 
 		@ # do not accumulate and return loop results (just return this)
 
+	getSVG: ->
+		lines = for strokeInfo in @strokes
+			[index, saturation, lightness, stroke] = strokeInfo
+			color = new SkulerColor @getColorAt(index).base, saturation, lightness
+			
+			hex = Utils.toCSSHex color.calculated
+			points = stroke.join(",")
+			'<polyline stroke="'+hex+'" points="'+points+'" />\n'
+
+		canv = @context.canvas
+		w = canv.width
+		h = canv.height
+
+		'<?xml version="1.0"?>\n' +
+			'<svg width="'+w+'" height="'+h+'" viewPort="0 0 '+w+' '+h+'" ' +
+			'version="1.1" xmlns="http://www.w3.org/2000/svg">\n' +
+			'<g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="'+@context.lineWidth+'">\n' +
+			lines +
+			'</g>\n</svg>'
 
 class SkulerSwatch
 
