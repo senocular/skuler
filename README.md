@@ -11,6 +11,7 @@ TODO
 
 - Kuler themes supported, but need to make swappable
 - New document button
+- Load/Save button
 - Undo/Redo
 - Keyboard shortcuts
 - :grey_question: Load .ASE button (not just drag and drop)

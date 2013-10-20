@@ -1,0 +1,19 @@
+body {
+	background-color: #fff;
+}
+svg, canvas {
+	position: absolute;
+	border: 1px solid silver;
+}
+canvas {
+	box-shadow: 3px 3px 10px rgba(0,0,0,0.33);
+}
+#skuler {
+	visibility: hidden;
+}
+#tri-group {
+	visibility: hidden;
+}
+#tri-loc, #tri-loc-shadow {
+	pointer-events: none;
+}

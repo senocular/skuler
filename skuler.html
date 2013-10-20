@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>Skuler - Sketching with Kuler Swatches</title>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" type="text/css" href="skuler.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/coffee-script/1.1.2/coffee-script.min.js"></script>
+	<script type="text/coffeescript" src="ASEParser.coffee"></script>
+
+</head>
+<body>
+
+<div id="skuler">
+	<canvas id="canvas" width="924" height="568"></canvas>
+	<svg id="controls" width="924" height="568" version="1.1"
+		xmlns="http://www.w3.org/2000/svg"
+		xmlns:xlink="http://www.w3.org/1999/xlink">
+		<defs>
+			<linearGradient id="tri-grad-lightness" x1="0%" y1="0%" x2="0%" y2="100%">
+				<stop offset="0%" stop-color="black" stop-opacity="1" />
+				<stop offset="100%" stop-color="white" stop-opacity="1" />
+			</linearGradient>
+			<linearGradient id="tri-grad-color" x1="0%" y1="0%" x2="100%" y2="0%">
+				<stop id="tri-base-color1" offset="0%" stop-color="black" stop-opacity="1" />
+				<stop id="tri-base-color2" offset="100%" stop-color="black" stop-opacity="0" />
+			</linearGradient>
+
+			<polygon id="tri-base-shape" points="0,100 174,0 174,200" />
+			<rect id="swatch-base-shape" x="0" y="0" width="40" height="40" stroke="black" />
+			<circle id="tri-loc-shape" r="6" stroke-width="2" fill="none" />
+		</defs>
+
+		<g id="swatch-group" transform="translate(10.5, 100.5)">
+			<rect x="-20" y="-10" width="70" height="270" rx="10" ry="10"
+				fill="Gainsboro" stroke="SlateGray" />
+			<g id="swatch-interact-group">
+				<use id="swatch-0" xlink:href="#swatch-base-shape" />
+				<use id="swatch-1" xlink:href="#swatch-base-shape" y="40" />
+				<use id="swatch-2" xlink:href="#swatch-base-shape" y="80" />
+				<use id="swatch-3" xlink:href="#swatch-base-shape" y="120" />
+				<use id="swatch-4" xlink:href="#swatch-base-shape" y="160" />
+			</g>
+			<use id="swatch-current" xlink:href="#swatch-base-shape" y="210" />
+		</g>
+
+		<g id="tri-group" transform="translate(50.5,0)">
+			<use xlink:href="#tri-base-shape" fill="url(#tri-grad-lightness)" />
+			<use id="tri-interact" xlink:href="#tri-base-shape" fill="url(#tri-grad-color)" stroke="black" />
+
+			<use id="tri-loc-shadow" xlink:href="#tri-loc-shape" stroke="black" />
+			<use id="tri-loc" xlink:href="#tri-loc-shape" stroke="white" />
+		</g>
+	</svg>
+</div>
+
+<script type="text/coffeescript" src="Skuler.coffee"></script>
+
+</body>
+</html>
