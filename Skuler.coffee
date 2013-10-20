@@ -45,22 +45,25 @@ class Skuler
 
 
 	setASE: (ase) ->
-		for color, i in ase.colors
-			$("#swatch-#{i}")
-				.data("color", color)
-				.css("fill", Utils.toCSSHex color)
 
-		@drawing.setColor new SkulerColor ase.colors[0]
+		@drawing.setPalette ase.colors
+		@drawing.redraw()
+
+		@updateViewSwatchPalette()
 		@updateViewCurrColor()
 		@updateViewTriColorSelect()
-		@drawing.redraw()
+
+
+	updateViewSwatchPalette: ->
+		for color, i in @drawing.palette
+			$("[data-index=#{i}]")
+				.css("fill", Utils.toCSSHex color.base)
 
 
 	updateViewSwatchSelect: (visible, $fromSwatch) ->
-		console.log "in"
 		@$triGroup.css "visibility", if visible then "visible" else "hidden"
 
-		hex = Utils.toCSSHex @drawing.color.base
+		hex = Utils.toCSSHex @drawing.getColor().base
 		@$triColor1.css "stopColor", hex
 		@$triColor2.css "stopColor", hex
 
@@ -77,9 +80,10 @@ class Skuler
 
 
 	updateViewTriColorSelect: ->
-		s = @drawing.color.saturation
+		color = @drawing.getColor()
+		s = color.saturation
 		si = 1 - s # inverted
-		l = @drawing.color.lightness
+		l = color.lightness
 
 		# from satruation, lightness to x, y
 		triBox = @$triInteract[0].getBBox()
@@ -91,7 +95,7 @@ class Skuler
 
 
 	updateViewCurrColor: ->
-		@$swatchCurrent.css "fill", Utils.toCSSHex @drawing.color.calculated
+		@$swatchCurrent.css "fill", Utils.toCSSHex @drawing.getColor().calculated
 
 
 	handleFileDragOver:  (event) ->
@@ -111,8 +115,10 @@ class Skuler
 
 	handleSwatchDown: (event) =>
 		$use = $ event.target.correspondingUseElement
-		@drawing.setColor new SkulerColor parseInt $use.data "color"
+		@drawing.setColorIndex $use.data "index"
 		
+		@updateViewCurrColor()
+		@updateViewTriColorSelect()
 		@updateViewSwatchSelect true, $use
 
 		@$doc.on "mouseup", @handleSwatchUp
@@ -127,8 +133,8 @@ class Skuler
 
 	handleSwatchClick: (event) =>
 		$use = $ event.target.correspondingUseElement
-		color = parseInt $use.data "color"
-		@drawing.setColor new SkulerColor color, 1, 0
+		@drawing.setColorIndex $use.data "index"
+		@drawing.getColor().adjust 1, 0
 
 		@updateViewCurrColor()
 		@updateViewTriColorSelect()
@@ -147,7 +153,7 @@ class Skuler
 		l = Mouse.y/triBox.height
 		l = (l - s/2)/si if si # cannot divide 0 (fully saturated)
 
-		@drawing.color.adjust s, l
+		@drawing.getColor().adjust s, l
 
 		@updateViewCurrColor()
 		@updateViewTriColorSelect()
@@ -181,6 +187,7 @@ class SkulerDrawing
 	penX: 0
 	penY: 0
 
+	colorIndex: 0
 
 	constructor: (element) ->
 
@@ -192,14 +199,25 @@ class SkulerDrawing
 		@context.lineJoin = "round"
 		@context.beginPath()
 
-		@palette = [] # TODO
+		@palette = []
 
 		@stroke = []
 		@strokes = []
-		@setColor new SkulerColor
 
 
-	setColor: (@color) ->
+	setColorIndex: (@colorIndex) ->
+
+
+	setPalette: (colors) ->
+		@palette = (new SkulerColor color for color in colors)
+
+
+	getColor: ->
+		@palette[@colorIndex]
+
+
+	getColorAt: (index) ->
+		@palette[index]
 
 
 	strokeStart: (@penX, @penY) ->
@@ -209,7 +227,7 @@ class SkulerDrawing
 	strokeTo: (penX, penY) ->
 
 		@context.beginPath()
-		@context.strokeStyle = Utils.toCSSHex @color.calculated
+		@context.strokeStyle = Utils.toCSSHex @getColor().calculated
 		@context.moveTo @penX, @penY
 		@context.lineTo penX, penY
 		@context.stroke()
@@ -226,7 +244,9 @@ class SkulerDrawing
 
 
 	commitStroke: (stroke) ->
-		@strokes.push [@color, stroke]
+		# SkulerColor referenced for saturation and lightness only
+		color = @palette[@colorIndex]
+		@strokes.push [@colorIndex, color.saturation, color.lightness, stroke]
 
 
 	redraw: ->
@@ -234,7 +254,11 @@ class SkulerDrawing
 		@context.clearRect 0, 0, canv.width, canv.height
 
 		for strokeInfo in @strokes
-			[color, stroke] = strokeInfo
+			[index, saturation, lightness, stroke] = strokeInfo
+
+			color = @getColorAt(index)
+			color.adjust saturation, lightness
+
 			@context.beginPath()
 
 			for x, i in stroke by 2
