@@ -14,6 +14,7 @@ class Skuler
 		@$triLocShadow = $ "#tri-loc-shadow"
 
 		@$swatchGroup = $ "#swatch-group"
+		@$swatchIndicator = $ "#swatch-indicator"
 		@$swatchInteractGroup = $ "#swatch-interact-group"
 		@$swatchCurrent = $ "#swatch-current"
 
@@ -50,12 +51,13 @@ class Skuler
 				.css("fill", Utils.toCSSHex color)
 
 		@drawing.setColor new SkulerColor ase.colors[0]
-		@updateViewCurrSwatch()
-		@updateViewTriangleSelect()
+		@updateViewCurrColor()
+		@updateViewTriColorSelect()
 		@drawing.redraw()
 
 
-	updateViewTriangle: (visible, $fromSwatch) ->
+	updateViewSwatchSelect: (visible, $fromSwatch) ->
+		console.log "in"
 		@$triGroup.css "visibility", if visible then "visible" else "hidden"
 
 		hex = Utils.toCSSHex @drawing.color.base
@@ -71,8 +73,10 @@ class Skuler
 			triY = swatchesY + swatchY + (swatchH/2) - (triH/2)
 			@$triGroup[0].transform.baseVal.getItem(0).matrix.f = triY
 
+			@$swatchIndicator[0].y.baseVal.value = swatchY
 
-	updateViewTriangleSelect: ->
+
+	updateViewTriColorSelect: ->
 		s = @drawing.color.saturation
 		si = 1 - s # inverted
 		l = @drawing.color.lightness
@@ -85,17 +89,8 @@ class Skuler
 		@$triLoc.attr("x", x).attr("y", y)
 		@$triLocShadow.attr("x", 1 + x).attr("y", 1 + y)
 
-	updateViewTriangleLoc: (x, y) ->
-		if not x? and not y?
-			triBox = @$triInteract[0].getBBox()
-			x = 0
-			y = triBox.height/2
 
-		@$triLoc.attr("x", x).attr("y", y)
-		@$triLocShadow.attr("x", 1 + x).attr("y", 1 + y)
-
-
-	updateViewCurrSwatch: ->
+	updateViewCurrColor: ->
 		@$swatchCurrent.css "fill", Utils.toCSSHex @drawing.color.calculated
 
 
@@ -118,7 +113,7 @@ class Skuler
 		$use = $ event.target.correspondingUseElement
 		@drawing.setColor new SkulerColor parseInt $use.data "color"
 		
-		@updateViewTriangle true, $use
+		@updateViewSwatchSelect true, $use
 
 		@$doc.on "mouseup", @handleSwatchUp
 
@@ -126,7 +121,7 @@ class Skuler
 
 
 	handleSwatchUp: (event) =>
-		@updateViewTriangle false
+		@updateViewSwatchSelect false
 		@$doc.off "mouseup", @handleSwatchUp
 
 
@@ -135,8 +130,8 @@ class Skuler
 		color = parseInt $use.data "color"
 		@drawing.setColor new SkulerColor color, 1, 0
 
-		@updateViewCurrSwatch()
-		@updateViewTriangleSelect()
+		@updateViewCurrColor()
+		@updateViewTriColorSelect()
 
 
 	handleTriMove: (event) =>
@@ -154,8 +149,8 @@ class Skuler
 
 		@drawing.color.adjust s, l
 
-		@updateViewCurrSwatch()
-		@updateViewTriangleSelect()
+		@updateViewCurrColor()
+		@updateViewTriColorSelect()
 
 
 	handleStartDraw: (event) =>
@@ -304,7 +299,7 @@ class Utils
 
 
 class Mouse
-	
+
 	@x: 0
 	@y: 0
 
