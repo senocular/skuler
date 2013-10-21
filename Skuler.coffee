@@ -20,7 +20,6 @@ class Skuler
 
 		@$svgCode = $ "#svg-code"
 
-
 		@drawing = new SkulerDrawing document.getElementById "canvas"
 
 		# event handlers
@@ -314,7 +313,7 @@ class SkulerDrawing
 
 			[index, saturation, lightness, stroke] = strokeInfo
 
-			color = @getColorAt(index)
+			color = @getColorAt index
 			color.adjust saturation, lightness
 
 			@context.beginPath()
@@ -335,7 +334,7 @@ class SkulerDrawing
 
 	getSVG: ->
 		lines = ""
-		
+
 		if @strokes.length
 
 			group = lastGroup = null;
@@ -376,9 +375,6 @@ class SkulerSwatch
 
 
 class SkulerColor
-
-	calculated: 0x000000
-
 
 	constructor: (@base = 0x000000, @saturation = 1, @lightness = 0) ->
 		@calculate()

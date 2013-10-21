@@ -20,6 +20,8 @@ Usage
 0. ...
 0. Profit!!!
 
+Have only tested on Chrome. Unsure of browser support.
+
 
 TODO
 ----
