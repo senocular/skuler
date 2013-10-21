@@ -335,7 +335,7 @@ class SkulerDrawing
 	getSVG: ->
 		lines = ""
 
-		if @strokes.length
+		if @strokeIndex && @strokes.length
 
 			group = lastGroup = null;
 			lines = '\t<g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="'+@context.lineWidth+'">\n'
