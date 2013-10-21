@@ -32,6 +32,10 @@ class Skuler
 
 		@$triInteract.on "mousemove", @handleTriMove
 
+		$("#new").on "click", @handleNew
+		$("#undo").on "click", @handleUndo
+		$("#redo").on "click", @handleRedo
+
 		# initial theme
 		@setASE 
 			name: "Beach Umbrella"
@@ -44,9 +48,9 @@ class Skuler
 		@reader.readAsArrayBuffer file 
 
 
-	setASE: (ase) ->
+	setASE: (@ase) ->
 
-		@drawing.setPalette ase.colors
+		@drawing.setPalette @ase.colors
 		@drawing.redraw()
 
 		@updateViewSwatchPalette()
@@ -167,6 +171,8 @@ class Skuler
 
 			@$controls.on "mousemove", @handleMoveDraw
 			@$doc.on "mouseup", @handleStopDraw
+
+			event.preventDefault()
 		
 
 	handleMoveDraw: (event) =>
@@ -182,27 +188,48 @@ class Skuler
 		@$doc.off "mouseup", @handleStopDraw
 
 
+	handleNew: (event) =>
+		@drawing.clear() if confirm "Clear existing drawing and start anew?"
+
+		
+	handleUndo: (event) =>
+		@drawing.undo()
+
+		
+	handleRedo: (event) =>
+		@drawing.redo()
+
+
 class SkulerDrawing
-
-	penX: 0
-	penY: 0
-
-	colorIndex: 0
 
 	constructor: (element) ->
 
 		# saved drawing context
 		@context = element.getContext "2d"
+
+		@palette = []
+		@colorIndex = 0
+
+		@clear()
+
+
+	clear: ->
+		canv = @context.canvas
+		@context.clearRect 0, 0, canv.width, canv.height
+
 		@context.strokeStyle = "#000"
 		@context.lineWidth = 15
 		@context.lineCap = "round"
 		@context.lineJoin = "round"
 		@context.beginPath()
 
-		@palette = []
 
 		@stroke = []
 		@strokes = []
+		@strokeIndex = 0
+
+		@penX = 0
+		@penY = 0
 
 
 	setColorIndex: (@colorIndex) ->
@@ -243,17 +270,33 @@ class SkulerDrawing
 			@stroke = []
 
 
+	undo: ->
+		return if @stroke.length # not while drawing
+		@strokeIndex = Utils.clamp @strokeIndex - 1, 0, @strokes.length 
+		@redraw()
+
+
+	redo: ->
+		return if @stroke.length # not while drawing
+		@strokeIndex = Utils.clamp @strokeIndex + 1, 0, @strokes.length
+		@redraw()
+
+
 	commitStroke: (stroke) ->
 		# SkulerColor referenced for saturation and lightness only
 		color = @palette[@colorIndex]
+		@strokes.length = @strokeIndex # clears redo stack
 		@strokes.push [@colorIndex, color.saturation, color.lightness, stroke]
+		@strokeIndex = @strokes.length
 
 
 	redraw: ->
 		canv = @context.canvas
 		@context.clearRect 0, 0, canv.width, canv.height
 
-		for strokeInfo in @strokes
+		for strokeInfo, si in @strokes
+			break unless si < @strokeIndex
+
 			[index, saturation, lightness, stroke] = strokeInfo
 
 			color = @getColorAt(index)
@@ -261,10 +304,10 @@ class SkulerDrawing
 
 			@context.beginPath()
 
-			for x, i in stroke by 2
-				y = stroke[i + 1]
+			for x, pi in stroke by 2
+				y = stroke[pi + 1]
 
-				if i is 0
+				if pi is 0
 					@context.moveTo x, y
 				else
 					@context.lineTo x, y
@@ -278,7 +321,9 @@ class SkulerDrawing
 	getSVG: ->
 		group = lastGroup = null;
 		lines = ""
-		for strokeInfo in @strokes
+		for strokeInfo, si in @strokes
+			break unless si < @strokeIndex
+
 			[index, saturation, lightness, stroke] = strokeInfo
 
 			color = new SkulerColor @getColorAt(index).base, saturation, lightness

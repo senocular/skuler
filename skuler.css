@@ -1,13 +1,31 @@
 body {
+	position: relative;
 	background-color: #fff;
+	padding:5px;
 }
 svg, canvas {
 	position: absolute;
+	top:0;
+	left:0;
 	border: 1px solid silver;
 }
 canvas {
 	box-shadow: 3px 3px 10px rgba(0,0,0,0.33);
 }
+
+nav {
+	margin-top:575px;
+}
+
+button {
+	font-size: 120%;
+	padding:7px 15px;
+}
+
+#undo {
+	margin-left:30px;
+}
+
 #skuler {
 	visibility: hidden;
 }
