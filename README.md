@@ -24,7 +24,7 @@ Usage
 TODO
 ----
 
-- Keyboard shortcuts
+- :grey_question: Keyboard shortcuts
 - :grey_question: Load/Save button (not trivial)
 - :grey_question: Load .ASE button vs just drag and drop
 - :grey_question: Change brush size
