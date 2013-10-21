@@ -58,6 +58,7 @@ class Skuler
 		@updateViewSwatchPalette()
 		@updateViewCurrColor()
 		@updateViewTriColorSelect()
+		@updateViewSVGCode()
 
 
 	updateViewSVGCode: ->
