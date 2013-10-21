@@ -274,14 +274,24 @@ class SkulerDrawing
 
 		@ # do not accumulate and return loop results (just return this)
 
+
 	getSVG: ->
-		lines = for strokeInfo in @strokes
+		group = lastGroup = null;
+		lines = ""
+		for strokeInfo in @strokes
 			[index, saturation, lightness, stroke] = strokeInfo
+
 			color = new SkulerColor @getColorAt(index).base, saturation, lightness
-			
 			hex = Utils.toCSSHex color.calculated
-			points = stroke.join(",")
-			'<polyline stroke="'+hex+'" points="'+points+'" />\n'
+			group = '\t\t<g data-index="'+index+'" data-s="'+saturation+'" data-l="'+lightness+'" stroke="'+hex+'" >\n'
+
+			if group isnt lastGroup
+				lines += '\t\t</g>\n' if lastGroup?
+				lines += group
+				lastGroup = group
+			lines += '\t\t\t<polyline points="'+stroke.join(",")+'" />\n'
+
+		lines += '\t\t</g>\n' if lastGroup?
 
 		canv = @context.canvas
 		w = canv.width
@@ -290,9 +300,10 @@ class SkulerDrawing
 		'<?xml version="1.0"?>\n' +
 			'<svg width="'+w+'" height="'+h+'" viewPort="0 0 '+w+' '+h+'" ' +
 			'version="1.1" xmlns="http://www.w3.org/2000/svg">\n' +
-			'<g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="'+@context.lineWidth+'">\n' +
+			'\t<g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="'+@context.lineWidth+'">\n' +
 			lines +
-			'</g>\n</svg>'
+			'\t</g>\n</svg>'
+
 
 class SkulerSwatch
 
