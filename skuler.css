@@ -1,12 +1,11 @@
 body {
-	position: relative;
 	background-color: #fff;
-	padding:5px;
+	margin: 0;
 }
 svg, canvas {
 	position: absolute;
-	top:0;
-	left:0;
+	top:5px;
+	left:5px;
 	border: 1px solid silver;
 }
 canvas {
@@ -14,15 +13,16 @@ canvas {
 }
 
 nav {
-	margin-top:575px;
+	padding-top:585px;
 }
 
 button {
 	font-size: 120%;
 	padding:7px 15px;
+	margin-left:5px;
 }
 
-#undo {
+#undo, #svg {
 	margin-left:30px;
 }
 
@@ -34,4 +34,20 @@ button {
 }
 #tri-loc, #tri-loc-shadow {
 	pointer-events: none;
+}
+
+#svg-code {
+	display: none;
+	position: absolute;
+	padding:15px;
+	border:1px solid silver;
+	border-top: none;
+	margin: 0 5px 5px 5px;
+	top:0;
+	right:0;
+	left:0;
+	height:550px;
+	background-color: #EEE;
+	color:#333;
+	overflow: auto;
 }

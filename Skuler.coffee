@@ -18,6 +18,8 @@ class Skuler
 		@$swatchInteractGroup = $ "#swatch-interact-group"
 		@$swatchCurrent = $ "#swatch-current"
 
+		@$svgCode = $ "#svg-code"
+
 
 		@drawing = new SkulerDrawing document.getElementById "canvas"
 
@@ -35,6 +37,7 @@ class Skuler
 		$("#new").on "click", @handleNew
 		$("#undo").on "click", @handleUndo
 		$("#redo").on "click", @handleRedo
+		$("#svg").on "click", @handleSVG
 
 		# initial theme
 		@setASE 
@@ -56,6 +59,10 @@ class Skuler
 		@updateViewSwatchPalette()
 		@updateViewCurrColor()
 		@updateViewTriColorSelect()
+
+
+	updateViewSVGCode: ->
+		@$svgCode.text @drawing.getSVG()
 
 
 	updateViewSwatchPalette: ->
@@ -190,14 +197,22 @@ class Skuler
 
 	handleNew: (event) =>
 		@drawing.clear() if confirm "Clear existing drawing and start anew?"
+		@updateViewSVGCode()
 
 		
 	handleUndo: (event) =>
 		@drawing.undo()
+		@updateViewSVGCode()
 
 		
 	handleRedo: (event) =>
 		@drawing.redo()
+		@updateViewSVGCode()
+
+		
+	handleSVG: (event) =>
+		@updateViewSVGCode()
+		@$svgCode.slideToggle "fast"
 
 
 class SkulerDrawing
@@ -319,24 +334,30 @@ class SkulerDrawing
 
 
 	getSVG: ->
-		group = lastGroup = null;
 		lines = ""
-		for strokeInfo, si in @strokes
-			break unless si < @strokeIndex
+		
+		if @strokes.length
 
-			[index, saturation, lightness, stroke] = strokeInfo
+			group = lastGroup = null;
+			lines = '\t<g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="'+@context.lineWidth+'">\n'
+			
+			for strokeInfo, si in @strokes
+				break unless si < @strokeIndex
 
-			color = new SkulerColor @getColorAt(index).base, saturation, lightness
-			hex = Utils.toCSSHex color.calculated
-			group = '\t\t<g data-index="'+index+'" data-s="'+saturation+'" data-l="'+lightness+'" stroke="'+hex+'" >\n'
+				[index, saturation, lightness, stroke] = strokeInfo
 
-			if group isnt lastGroup
-				lines += '\t\t</g>\n' if lastGroup?
-				lines += group
-				lastGroup = group
-			lines += '\t\t\t<polyline points="'+stroke.join(",")+'" />\n'
+				color = new SkulerColor @getColorAt(index).base, saturation, lightness
+				hex = Utils.toCSSHex color.calculated
+				group = '\t\t<g data-index="'+index+'" data-s="'+saturation+'" data-l="'+lightness+'" stroke="'+hex+'" >\n'
 
-		lines += '\t\t</g>\n' if lastGroup?
+				if group isnt lastGroup
+					lines += '\t\t</g>\n' if lastGroup?
+					lines += group
+					lastGroup = group
+				lines += '\t\t\t<polyline points="'+stroke.join(",")+'" />\n'
+
+			lines += '\t\t</g>\n' if lastGroup?
+			lines += '\t</g>\n'
 
 		canv = @context.canvas
 		w = canv.width
@@ -345,9 +366,8 @@ class SkulerDrawing
 		'<?xml version="1.0"?>\n' +
 			'<svg width="'+w+'" height="'+h+'" viewPort="0 0 '+w+' '+h+'" ' +
 			'version="1.1" xmlns="http://www.w3.org/2000/svg">\n' +
-			'\t<g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="'+@context.lineWidth+'">\n' +
 			lines +
-			'\t</g>\n</svg>'
+			'</svg>'
 
 
 class SkulerSwatch
