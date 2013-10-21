@@ -18,9 +18,12 @@ class Skuler
 		@$swatchInteractGroup = $ "#swatch-interact-group"
 		@$swatchCurrent = $ "#swatch-current"
 
+		@$download = $  "#download"
+
 		@$svgCode = $ "#svg-code"
 
 		@drawing = new SkulerDrawing document.getElementById "canvas"
+		@reader = new FileReader
 
 		# event handlers
 		@$doc.on "dragover", @handleFileDragOver
@@ -37,6 +40,7 @@ class Skuler
 		$("#undo").on "click", @handleUndo
 		$("#redo").on "click", @handleRedo
 		$("#svg").on "click", @handleSVG
+		@$download.on "click", @handleSetupSaveSVG
 
 		# initial theme
 		@setASE 
@@ -44,10 +48,14 @@ class Skuler
 			colors: [0xff2151, 0xff7729, 0xffad29, 0xffebca, 0x1ab58a]
 
 
-	parseFile: (file) ->
-		@reader = new FileReader()
-		@reader.onload = @handleFileRead
-		@reader.readAsArrayBuffer file 
+	parseASEFile: (@readFile = @readFile) ->
+		@reader.onload = @handleASEFileRead
+		@reader.readAsArrayBuffer @readFile 
+
+
+	parseSVGFile: (@readFile = @readFile) ->
+		@reader.onload = @handleSVGFileRead
+		@reader.readAsBinaryString @readFile 
 
 
 	setASE: (@ase) ->
@@ -115,13 +123,43 @@ class Skuler
 
 
 	handleFileDrop: (event) =>
-		@parseFile event.originalEvent.dataTransfer.files[0] # only take one file
+		# start file parsing starting with ASE and error on 
+		# parsing additional formats
+		@parseASEFile event.originalEvent.dataTransfer.files[0] # only take one file
 		event.preventDefault()
 
 
-	handleFileRead: (event) =>
+	handleASEFileRead: (event) =>
 		buffer = event.target.result
-		@setASE new ASEParser(buffer).parse()
+		try
+			@setASE new ASEParser(buffer).parse()
+			@readFile = null
+		catch err
+			# not ASE file, how about SVG?
+			@parseSVGFile()
+
+
+	handleSVGFileRead: (event) =>
+		str = event.target.result
+		try
+			@drawing.readSVG str
+		catch err
+			# not any recognized file
+			alert "Only Kuler ASE and Skuler SVG files are supported"
+		finally
+			@readFile = null
+
+
+	handleSetupSaveSVG: (event) =>
+		console.log "in"
+		try
+			blob = new Blob [@drawing.getSVG()], {type:'text/plain'}
+			@$download.attr "href", URL.createObjectURL(blob)
+			true
+		catch err
+			# probably not supported
+			console.log err
+			false
 
 
 	handleSwatchDown: (event) =>
@@ -368,6 +406,15 @@ class SkulerDrawing
 			'version="1.1" xmlns="http://www.w3.org/2000/svg">\n' +
 			lines +
 			'</svg>'
+
+
+	readSVG: (svgStr) ->
+		parser = new DOMParser
+		svg = parser.parseFromString svgStr, "text/xml"
+		throw new Error "Expected root node to be <svg>." if svg.firstChild.localName isnt "svg"
+
+		# TODO: read SVG
+
 
 
 class SkulerSwatch
