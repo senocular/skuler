@@ -245,10 +245,12 @@ class Skuler
 		
 	handleUndo: (event) =>
 		@drawing.undo()
+		@updateViewCurrColor()
 
 		
 	handleRedo: (event) =>
 		@drawing.redo()
+		@updateViewCurrColor()
 
 
 	handleKeyShortcut: (event) =>
@@ -286,11 +288,13 @@ class Skuler
 			when 89 # z
 				if event.ctrlKey
 					@drawing.redo()
+					@updateViewCurrColor()
 					true
 
 			when 90 # z
 				if event.ctrlKey
 					@drawing.undo()
+					@updateViewCurrColor()
 					true
 
 			when 77 # m
