@@ -8,6 +8,10 @@ class SkulerDrawing
 		@palette = []
 		@colorIndex = 0
 
+		@stroke = []
+		@strokes = []
+		@strokeIndex = 0
+
 		@clear()
 
 
@@ -19,8 +23,8 @@ class SkulerDrawing
 		@context.lineWidth = 15
 		@context.lineCap = "round"
 		@context.lineJoin = "round"
-		@context.beginPath()
 
+		@strokeStop()
 
 		@stroke = []
 		@strokes = []
@@ -30,11 +34,19 @@ class SkulerDrawing
 		@penY = 0
 
 
+	setPalette: (colors) ->
+		@strokeStart() if @isStroking()
+		@palette = (new SkulerColor color for color in colors)
+
+
 	setColorIndex: (colorIndex) ->
+		@strokeStart() if @isStroking()
 		@colorIndex = Utils.clamp colorIndex, 0, @palette.length - 1
 
-	setPalette: (colors) ->
-		@palette = (new SkulerColor color for color in colors)
+
+	adjustColor: (s, l) ->
+		@strokeStart() if @isStroking()
+		@getColor().adjust s, l
 
 
 	getColor: ->
@@ -45,12 +57,12 @@ class SkulerDrawing
 		@palette[index]
 
 
-	strokeStart: (@penX, @penY) ->
+	strokeStart: (@penX = @penX, @penY = @penY) ->
+		@strokeStop()
 		@stroke = [@penX, @penY]
 
 
 	strokeTo: (penX, penY) ->
-
 		@context.beginPath()
 		@context.strokeStyle = Utils.toCSSHex @getColor().calculated
 		@context.moveTo @penX, @penY
@@ -63,19 +75,22 @@ class SkulerDrawing
 
 
 	strokeStop: ->
-		if @stroke.length
+		if @isStroking()
 			@commitStroke @stroke
 			@stroke = []
 
+	isStroking: ->
+		@stroke.length
+
 
 	undo: ->
-		return if @stroke.length # not while drawing
+		@strokeStop()
 		@strokeIndex = Utils.clamp @strokeIndex - 1, 0, @strokes.length 
 		@redraw()
 
 
 	redo: ->
-		return if @stroke.length # not while drawing
+		@strokeStop()
 		@strokeIndex = Utils.clamp @strokeIndex + 1, 0, @strokes.length
 		@redraw()
 

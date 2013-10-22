@@ -66,7 +66,7 @@ class Skuler
 
 
 	setSL: (s, l) ->
-		@drawing.getColor().adjust s, l
+		@drawing.adjustColor s, l
 
 		@updateViewCurrColor()
 		@updateViewTriColorSelect()
@@ -82,7 +82,9 @@ class Skuler
 
 
 	createNew: ->
-		@drawing.clear() if confirm "Clear existing drawing and start anew?"
+		if confirm "Clear existing drawing and start anew?"
+			@drawing.clear()
+			@handleStopDraw null # shouldn't be necessary given confurm above
 
 
 	updateViewSwatchPalette: ->
