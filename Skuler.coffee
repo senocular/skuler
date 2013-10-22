@@ -20,8 +20,6 @@ class Skuler
 
 		@$download = $  "#download"
 
-		@$svgCode = $ "#svg-code"
-
 		@drawing = new SkulerDrawing document.getElementById "canvas"
 		@reader = new FileReader
 
@@ -39,7 +37,6 @@ class Skuler
 		$("#new").on "click", @handleNew
 		$("#undo").on "click", @handleUndo
 		$("#redo").on "click", @handleRedo
-		$("#svg").on "click", @handleSVG
 		@$download.on "click", @handleSetupSaveSVG
 
 		# initial theme
@@ -59,18 +56,12 @@ class Skuler
 
 
 	setASE: (@ase) ->
-
 		@drawing.setPalette @ase.colors
 		@drawing.redraw()
 
 		@updateViewSwatchPalette()
 		@updateViewCurrColor()
 		@updateViewTriColorSelect()
-		@updateViewSVGCode()
-
-
-	updateViewSVGCode: ->
-		@$svgCode.text @drawing.getSVG()
 
 
 	updateViewSwatchPalette: ->
@@ -136,6 +127,8 @@ class Skuler
 			@readFile = null
 		catch err
 			# not ASE file, how about SVG?
+			console.log "Trying to parse as ASE:"
+			console.dir err
 			@parseSVGFile()
 
 
@@ -145,6 +138,8 @@ class Skuler
 			@drawing.readSVG str
 		catch err
 			# not any recognized file
+			console.log "Trying to parse as SVG:"
+			console.dir err
 			alert "Only Kuler ASE and Skuler SVG files are supported"
 		finally
 			@readFile = null
@@ -235,22 +230,14 @@ class Skuler
 
 	handleNew: (event) =>
 		@drawing.clear() if confirm "Clear existing drawing and start anew?"
-		@updateViewSVGCode()
 
 		
 	handleUndo: (event) =>
 		@drawing.undo()
-		@updateViewSVGCode()
 
 		
 	handleRedo: (event) =>
 		@drawing.redo()
-		@updateViewSVGCode()
-
-		
-	handleSVG: (event) =>
-		@updateViewSVGCode()
-		@$svgCode.slideToggle "fast"
 
 
 class SkulerDrawing
@@ -413,7 +400,23 @@ class SkulerDrawing
 		svg = parser.parseFromString svgStr, "text/xml"
 		throw new Error "Expected root node to be <svg>." if svg.firstChild.localName isnt "svg"
 
-		# TODO: read SVG
+		lines = svg.querySelectorAll "polyline"
+
+		@strokes = for line in lines
+			att = line.parentNode.attributes
+			
+			index = Utils.clamp parseInt(att.getNamedItem("data-index").nodeValue), 0, 4
+			saturation = Utils.clamp Number(att.getNamedItem("data-s").nodeValue), 0, 1
+			lightness = Utils.clamp Number(att.getNamedItem("data-l").nodeValue), 0, 1
+			points = line.attributes.getNamedItem("points").nodeValue.split(",").map Number
+
+			[index, saturation, lightness, points]
+
+		@strokeIndex = @strokes.length
+		@redraw()
+
+
+
 
 
 

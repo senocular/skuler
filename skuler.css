@@ -33,7 +33,7 @@ nav a {
 	cursor: pointer;
 }
 
-#undo, #svg {
+#undo, #download {
 	margin-left:30px;
 }
 
@@ -45,20 +45,4 @@ nav a {
 }
 #tri-loc, #tri-loc-shadow {
 	pointer-events: none;
-}
-
-#svg-code {
-	display: none;
-	position: absolute;
-	padding:15px;
-	border:1px solid silver;
-	border-top: none;
-	margin: 0 5px 5px 5px;
-	top:0;
-	right:0;
-	left:0;
-	height:550px;
-	background-color: #EEE;
-	color:#333;
-	overflow: auto;
 }
