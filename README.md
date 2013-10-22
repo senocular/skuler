@@ -26,15 +26,15 @@ Have only tested on Chrome. Unsure of browser support.
 Keyboard Shortcuts
 ------------------
 
-CTRL + M: New document
-CTRL + Z: Undo
-CTRL + Y: Redo
-Page Up: Select previous swatch
-Page Down: Select next swatch
-UP Arrow: Decrease lightness
-DOWN Arrow: Increase lightness
-LEFT Arrow: Increase saturation
-RIGHT Arrow: Decrease saturation
+- CTRL + M: New document
+- CTRL + Z: Undo
+- CTRL + Y: Redo
+- Page Up: Select previous swatch
+- Page Down: Select next swatch
+- UP Arrow: Decrease lightness
+- DOWN Arrow: Increase lightness
+- LEFT Arrow: Increase saturation
+- RIGHT Arrow: Decrease saturation
 
 
 TODO
