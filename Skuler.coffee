@@ -124,7 +124,7 @@ class Skuler
 		y = triBox.height * (l*si + s/2) # compensate for triangle
 
 		@$triLoc.attr("x", x).attr("y", y)
-		@$triLocShadow.attr("x", 1 + x).attr("y", 1 + y)
+		@$triLocShadow.attr("x", x + 1).attr("y", y + 1)
 
 
 	updateViewCurrColor: ->
@@ -301,6 +301,14 @@ class Skuler
 				if event.ctrlKey
 					@createNew()
 					true
+
+			when 188 # , (<)
+				@drawing.setPenSize @drawing.penSize - 1
+				true
+
+			when 190 # . (>)
+				@drawing.setPenSize @drawing.penSize + 1
+				true
 
 		event.preventDefault() if preventsDefault
 

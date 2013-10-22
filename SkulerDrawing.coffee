@@ -1,5 +1,8 @@
 class SkulerDrawing
 
+	@MAX_PEN_SIZE: 5
+	@START_PEN_SIZE: 3
+
 	constructor: (element) ->
 
 		# saved drawing context
@@ -12,6 +15,8 @@ class SkulerDrawing
 		@strokes = []
 		@strokeIndex = 0
 
+		@penSize = SkulerDrawing.START_PEN_SIZE;
+
 		@clear()
 
 
@@ -20,7 +25,6 @@ class SkulerDrawing
 		@context.clearRect 0, 0, canv.width, canv.height
 
 		@context.strokeStyle = "#000"
-		@context.lineWidth = 15
 		@context.lineCap = "round"
 		@context.lineJoin = "round"
 
@@ -44,6 +48,11 @@ class SkulerDrawing
 		@colorIndex = Utils.clamp colorIndex, 0, @palette.length - 1
 
 
+	setPenSize: (size) ->
+		@strokeStart() if @isStroking()
+		@penSize = Utils.clamp size, 1, SkulerDrawing.MAX_PEN_SIZE
+
+
 	adjustColor: (s, l) ->
 		@strokeStart() if @isStroking()
 		@getColor().adjust s, l
@@ -57,6 +66,15 @@ class SkulerDrawing
 		@palette[index]
 
 
+	getLineWidth: (size = @penSize) ->
+		Math.pow 2, size + 1
+
+
+	getStrokeStyle: (color = null) ->
+		color = @getColor() unless color?
+		Utils.toCSSHex color.calculated
+
+
 	strokeStart: (@penX = @penX, @penY = @penY) ->
 		@strokeStop()
 		@stroke = [@penX, @penY]
@@ -64,7 +82,8 @@ class SkulerDrawing
 
 	strokeTo: (penX, penY) ->
 		@context.beginPath()
-		@context.strokeStyle = Utils.toCSSHex @getColor().calculated
+		@context.strokeStyle = @getStrokeStyle()
+		@context.lineWidth = @getLineWidth()
 		@context.moveTo @penX, @penY
 		@context.lineTo penX, penY
 		@context.stroke()
@@ -78,6 +97,7 @@ class SkulerDrawing
 		if @isStroking()
 			@commitStroke @stroke
 			@stroke = []
+
 
 	isStroking: ->
 		@stroke.length
@@ -99,7 +119,7 @@ class SkulerDrawing
 		# SkulerColor referenced for saturation and lightness only
 		color = @palette[@colorIndex]
 		@strokes.length = @strokeIndex # clears redo stack
-		@strokes.push [@colorIndex, color.saturation, color.lightness, stroke]
+		@strokes.push [@colorIndex, color.saturation, color.lightness, stroke, @penSize]
 		@strokeIndex = @strokes.length
 
 
@@ -110,12 +130,14 @@ class SkulerDrawing
 		for strokeInfo, si in @strokes
 			break unless si < @strokeIndex
 
-			[index, saturation, lightness, stroke] = strokeInfo
+			[index, saturation, lightness, stroke, size] = strokeInfo
 
 			color = @getColorAt index
 			color.adjust saturation, lightness
 
 			@context.beginPath()
+			@context.strokeStyle = @getStrokeStyle color
+			@context.lineWidth = @getLineWidth size
 
 			for x, pi in stroke by 2
 				y = stroke[pi + 1]
@@ -125,7 +147,6 @@ class SkulerDrawing
 				else
 					@context.lineTo x, y
 				
-			@context.strokeStyle = Utils.toCSSHex color.calculated
 			@context.stroke()
 
 		@ # do not accumulate and return loop results (just return this)
@@ -137,16 +158,17 @@ class SkulerDrawing
 		if @strokeIndex && @strokes.length
 
 			group = lastGroup = null;
-			lines = '\t<g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="'+@context.lineWidth+'">\n'
+			lines = '\t<g fill="none" stroke-linejoin="round" stroke-linecap="round">\n'
 			
 			for strokeInfo, si in @strokes
 				break unless si < @strokeIndex
 
-				[index, saturation, lightness, stroke] = strokeInfo
+				[index, saturation, lightness, stroke, size] = strokeInfo
 
 				color = new SkulerColor @getColorAt(index).base, saturation, lightness
-				hex = Utils.toCSSHex color.calculated
-				group = '\t\t<g data-index="'+index+'" data-s="'+saturation+'" data-l="'+lightness+'" stroke="'+hex+'" >\n'
+				hex = @getStrokeStyle color
+				group = '\t\t<g data-index="'+index+'" data-s="'+saturation+'" data-l="'+lightness+
+					'" stroke="'+hex+'" stroke-width="'+@getLineWidth(size)+'">\n'
 
 				if group isnt lastGroup
 					lines += '\t\t</g>\n' if lastGroup?
@@ -178,12 +200,14 @@ class SkulerDrawing
 		@strokes = for line in lines
 			att = line.parentNode.attributes
 			
-			index = Utils.clamp parseInt(att.getNamedItem("data-index").nodeValue), 0, 4
+			index = Utils.clamp parseInt(att.getNamedItem("data-index").nodeValue), 0, @palette.length - 1
 			saturation = Utils.clamp Number(att.getNamedItem("data-s").nodeValue), 0, 1
 			lightness = Utils.clamp Number(att.getNamedItem("data-l").nodeValue), 0, 1
 			points = line.attributes.getNamedItem("points").nodeValue.split(",").map Number
+			size = parseInt att.getNamedItem("stroke-width").nodeValue
+			size = Utils.clamp Math.round(Math.log(size)/Math.LN2 - 1), 1, SkulerDrawing.MAX_PEN_SIZE
 
-			[index, saturation, lightness, points]
+			[index, saturation, lightness, points, size]
 
 		@strokeIndex = @strokes.length
 		@redraw()

@@ -35,13 +35,15 @@ Keyboard Shortcuts
 - DOWN Arrow: Increase lightness
 - LEFT Arrow: Increase saturation
 - RIGHT Arrow: Decrease saturation
+- ,: Decrease brush size
+- .: Increase brush size
 
 
 TODO
 ----
 
+- :grey_question: Brush size UI
 - :grey_question: Load .ASE button vs just drag and drop
-- :grey_question: Change brush size
 - :grey_question: Required browser features detection
 
 
@@ -49,4 +51,5 @@ Known Issues
 ------------
 
 - With keyboard shortcuts, lightness depends on saturation. To get full lightness (white/black) you need to fully desaturate first.  In other words, the arrow keys are a direct coorelation of the location of the selection within the triangle color picker.
-- Color triangle doesn't register when interaction moves off the visible area of the triangle.  Probably won't fix
+- Undo will undo strokes as well as saturation and lightness settings, but selected swatch or pen size.
+- Color triangle doesn't register when interaction moves off the visible area of the triangle.  Probably won't fix.
