@@ -23,10 +23,23 @@ Usage
 Have only tested on Chrome. Unsure of browser support.
 
 
+Keyboard Shortcuts
+------------------
+
+CTRL + M: New document
+CTRL + Z: Undo
+CTRL + Y: Redo
+Page Up: Select previous swatch
+Page Down: Select next swatch
+UP Arrow: Decrease lightness
+DOWN Arrow: Increase lightness
+LEFT Arrow: Increase saturation
+RIGHT Arrow: Decrease saturation
+
+
 TODO
 ----
 
-- :grey_question: Keyboard shortcuts
 - :grey_question: Load .ASE button vs just drag and drop
 - :grey_question: Change brush size
 - :grey_question: Required browser features detection
@@ -35,4 +48,6 @@ TODO
 Known Issues
 ------------
 
+- With keyboard shortcuts, lightness depends on saturation. To get full lightness (white/black) you need to fully desaturate first.  In other words, the arrow keys are a direct coorelation of the location of the selection within the triangle color picker.
+- Using keyboard shortcuts in the middle of a stroke may prevent those changes to be saved with the document
 - Color triangle doesn't register when interaction moves off the visible area of the triangle.  Probably won't fix

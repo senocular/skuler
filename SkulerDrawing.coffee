@@ -30,8 +30,8 @@ class SkulerDrawing
 		@penY = 0
 
 
-	setColorIndex: (@colorIndex) ->
-
+	setColorIndex: (colorIndex) ->
+		@colorIndex = Utils.clamp colorIndex, 0, @palette.length - 1
 
 	setPalette: (colors) ->
 		@palette = (new SkulerColor color for color in colors)

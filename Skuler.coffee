@@ -26,6 +26,7 @@ class Skuler
 		# event handlers
 		@$doc.on "dragover", @handleFileDragOver
 		@$doc.on "drop", @handleFileDrop
+		@$doc.on "keydown", @handleKeyShortcut
 
 		@$controls.on "mousedown", @handleStartDraw
 
@@ -64,14 +65,34 @@ class Skuler
 		@updateViewTriColorSelect()
 
 
+	setSL: (s, l) ->
+		@drawing.getColor().adjust s, l
+
+		@updateViewCurrColor()
+		@updateViewTriColorSelect()
+
+
+	setSwatchIndex: (index, showTri = false) ->
+		@drawing.setColorIndex index
+
+		if @drawing.colorIndex is index # valid index passed; the change took
+			@updateViewCurrColor()
+			@updateViewTriColorSelect()
+			@updateViewSwatchSelect showTri, $("[data-index=#{index}]")
+
+
+	createNew: ->
+		@drawing.clear() if confirm "Clear existing drawing and start anew?"
+
+
 	updateViewSwatchPalette: ->
 		for color, i in @drawing.palette
 			$("[data-index=#{i}]")
 				.css("fill", Utils.toCSSHex color.base)
 
 
-	updateViewSwatchSelect: (visible, $fromSwatch) ->
-		@$triGroup.css "visibility", if visible then "visible" else "hidden"
+	updateViewSwatchSelect: (showTri, $fromSwatch) ->
+		@$triGroup.css "visibility", if showTri then "visible" else "hidden"
 
 		hex = Utils.toCSSHex @drawing.getColor().base
 		@$triColor1.css "stopColor", hex
@@ -127,8 +148,6 @@ class Skuler
 			@readFile = null
 		catch err
 			# not ASE file, how about SVG?
-			console.log "Trying to parse as ASE:"
-			console.dir err
 			@parseSVGFile()
 
 
@@ -138,15 +157,12 @@ class Skuler
 			@drawing.readSVG str
 		catch err
 			# not any recognized file
-			console.log "Trying to parse as SVG:"
-			console.dir err
 			alert "Only Kuler ASE and Skuler SVG files are supported"
 		finally
 			@readFile = null
 
 
 	handleSetupSaveSVG: (event) =>
-		console.log "in"
 		try
 			blob = new Blob [@drawing.getSVG()], {type:'text/plain'}
 			@$download.attr "href", URL.createObjectURL(blob)
@@ -159,14 +175,10 @@ class Skuler
 
 	handleSwatchDown: (event) =>
 		$use = $ event.target.correspondingUseElement
-		@drawing.setColorIndex $use.data "index"
-		
-		@updateViewCurrColor()
-		@updateViewTriColorSelect()
-		@updateViewSwatchSelect true, $use
+		index = parseInt $use.data "index"
+		@setSwatchIndex index, true
 
 		@$doc.on "mouseup", @handleSwatchUp
-
 		event.preventDefault()
 
 
@@ -197,10 +209,7 @@ class Skuler
 		l = Utils.mouse.y/triBox.height
 		l = (l - s/2)/si if si # cannot divide 0 (fully saturated)
 
-		@drawing.getColor().adjust s, l
-
-		@updateViewCurrColor()
-		@updateViewTriColorSelect()
+		@setSL s, l
 
 
 	handleStartDraw: (event) =>
@@ -229,7 +238,7 @@ class Skuler
 
 
 	handleNew: (event) =>
-		@drawing.clear() if confirm "Clear existing drawing and start anew?"
+		@createNew()
 
 		
 	handleUndo: (event) =>
@@ -238,6 +247,56 @@ class Skuler
 		
 	handleRedo: (event) =>
 		@drawing.redo()
+
+
+	handleKeyShortcut: (event) =>
+		slOffset = 0.1
+
+		preventsDefault = switch event.keyCode
+			when 33 # Page Up
+				@setSwatchIndex @drawing.colorIndex - 1
+				true
+
+			when 34 # Page Down
+				@setSwatchIndex @drawing.colorIndex + 1
+				true
+
+			when 37 # LEFT Arrow
+				color = @drawing.getColor()
+				@setSL color.saturation + slOffset, color.lightness
+				true
+
+			when 38 # UP Arrow
+				color = @drawing.getColor()
+				@setSL color.saturation, color.lightness - slOffset
+				true
+
+			when 39 # RIGHT Arrow
+				color = @drawing.getColor()
+				@setSL color.saturation - slOffset, color.lightness
+				true
+
+			when 40 # DOWN Arrow
+				color = @drawing.getColor()
+				@setSL color.saturation, color.lightness + slOffset
+				true
+
+			when 89 # z
+				if event.ctrlKey
+					@drawing.redo()
+					true
+
+			when 90 # z
+				if event.ctrlKey
+					@drawing.undo()
+					true
+
+			when 77 # m
+				if event.ctrlKey
+					@createNew()
+					true
+
+		event.preventDefault() if preventsDefault
 
 
 # init
