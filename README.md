@@ -49,5 +49,4 @@ Known Issues
 ------------
 
 - With keyboard shortcuts, lightness depends on saturation. To get full lightness (white/black) you need to fully desaturate first.  In other words, the arrow keys are a direct coorelation of the location of the selection within the triangle color picker.
-- Using keyboard shortcuts in the middle of a stroke may prevent those changes to be saved with the document
 - Color triangle doesn't register when interaction moves off the visible area of the triangle.  Probably won't fix
