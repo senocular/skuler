@@ -51,5 +51,5 @@ Known Issues
 ------------
 
 - With keyboard shortcuts, lightness depends on saturation. To get full lightness (white/black) you need to fully desaturate first.  In other words, the arrow keys are a direct coorelation of the location of the selection within the triangle color picker.
-- Undo will undo strokes as well as saturation and lightness settings, but selected swatch or pen size.
 - Color triangle doesn't register when interaction moves off the visible area of the triangle.  Probably won't fix.
+- Undo will undo strokes as well as saturation and lightness settings, but not selected swatch or pen size.
