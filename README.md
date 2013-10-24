@@ -31,8 +31,8 @@ Keyboard Shortcuts
 - CTRL + Y: Redo
 - Page Up: Select previous swatch
 - Page Down: Select next swatch
-- UP Arrow: Decrease lightness
-- DOWN Arrow: Increase lightness
+- UP Arrow: Increase lightness
+- DOWN Arrow: Decrease lightness
 - LEFT Arrow: Increase saturation
 - RIGHT Arrow: Decrease saturation
 - ,: Decrease brush size
