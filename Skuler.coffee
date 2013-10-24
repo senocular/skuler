@@ -116,7 +116,7 @@ class Skuler
 		color = @drawing.getColor()
 		s = color.saturation
 		si = 1 - s # inverted
-		l = color.lightness
+		l = 1 - color.lightness
 
 		# from satruation, lightness to x, y
 		triBox = @$triInteract[0].getBBox()
@@ -208,7 +208,7 @@ class Skuler
 		s = 1 - si
 
 		# lightness + compensating for triangular shape
-		l = Utils.mouse.y/triBox.height
+		l = 1 - Utils.mouse.y/triBox.height
 		l = (l - s/2)/si if si # cannot divide 0 (fully saturated)
 
 		@setSL s, l
@@ -272,7 +272,7 @@ class Skuler
 
 			when 38 # UP Arrow
 				color = @drawing.getColor()
-				@setSL color.saturation, color.lightness - slOffset
+				@setSL color.saturation, color.lightness + slOffset
 				true
 
 			when 39 # RIGHT Arrow
@@ -282,7 +282,7 @@ class Skuler
 
 			when 40 # DOWN Arrow
 				color = @drawing.getColor()
-				@setSL color.saturation, color.lightness + slOffset
+				@setSL color.saturation, color.lightness - slOffset
 				true
 
 			when 89 # z
