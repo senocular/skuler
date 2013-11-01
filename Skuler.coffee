@@ -285,7 +285,7 @@ class Skuler
 				@setSL color.saturation, color.lightness - slOffset
 				true
 
-			when 89 # z
+			when 89 # y
 				if event.ctrlKey
 					@drawing.redo()
 					@updateViewCurrColor()
