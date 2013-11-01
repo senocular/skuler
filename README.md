@@ -3,7 +3,8 @@ Skuler
 
 Simple, web-based sketching app using swappable Kuler themes/palettes/swatches. 
 
-This was made to test an idea about restricting a drawing to a limited set of colors.
+This was made to test an idea about restricting a drawing to a limited set of colors.  
+It was built with HTML5 Canvas, SVG, and JavaScript (via CoffeeScript). Tested only with Chrome (v30).
 
 
 Usage
@@ -20,7 +21,6 @@ Usage
 0. ...
 0. Profit!!!
 
-Have only tested on Chrome. Unsure of browser support.
 
 
 Keyboard Shortcuts
