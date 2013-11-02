@@ -167,7 +167,10 @@ class Skuler
 	handleSetupSaveSVG: (event) =>
 		try
 			blob = new Blob [@drawing.getSVG()], {type:'text/plain'}
-			@$download.attr "href", URL.createObjectURL(blob)
+			if navigator.msSaveBlob?
+				navigator.msSaveBlob(blob, @$download.attr "download")
+			else
+				@$download.attr "href", URL.createObjectURL(blob)
 			true
 		catch err
 			# probably not supported
