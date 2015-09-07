@@ -179,7 +179,7 @@ class Skuler
 
 
 	handleSwatchDown: (event) =>
-		$use = $ event.target.correspondingUseElement
+		$use = $ event.target
 		index = parseInt $use.data "index"
 		@setSwatchIndex index, true
 
@@ -193,7 +193,7 @@ class Skuler
 
 
 	handleSwatchClick: (event) =>
-		$use = $ event.target.correspondingUseElement
+		$use = $ event.target
 		@drawing.setColorIndex $use.data "index"
 		@drawing.getColor().adjust 1, 0
 
